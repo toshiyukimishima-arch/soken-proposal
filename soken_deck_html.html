@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>創建 Expansion提案 | Firework</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f4f0;color:#1a1a18;font-size:14px;line-height:1.6}
+:root{--teal:#1D9E75;--teal-l:#E1F5EE;--teal-d:#085041;--teal-m:#5DCAA5;--purple:#534AB7;--purple-l:#EEEDFE;--purple-d:#3C3489;--purple-m:#AFA9EC;--gray:#f1efe8;--gray-d:#444441;--border:#e2e0d8;--text:#1a1a18;--muted:#6b6b67;--hint:#9e9d98}
+
+/* Layout */
+.app{max-width:860px;margin:0 auto;padding:24px 16px}
+.deck{background:#fff;border:1px solid var(--border);border-radius:14px;overflow:hidden}
+
+/* Nav */
+.nav{background:#f8f7f3;border-bottom:1px solid var(--border);padding:10px 14px;display:flex;flex-wrap:wrap;gap:6px}
+.nav-btn{font-size:11px;padding:4px 10px;border-radius:6px;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:inherit;transition:all .15s}
+.nav-btn.active{border-color:var(--teal);background:var(--teal-l);color:var(--teal-d);font-weight:600}
+
+/* Slides */
+.slide{display:none;padding:36px 44px 32px;min-height:480px;flex-direction:column;gap:20px}
+.slide.active{display:flex}
+
+/* Footer */
+.footer{background:#f8f7f3;border-top:1px solid var(--border);padding:10px 20px;display:flex;justify-content:space-between;align-items:center}
+.footer-btn{font-size:12px;padding:5px 14px;border-radius:6px;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:inherit;transition:all .15s}
+.footer-btn:hover:not(:disabled){background:var(--gray)}
+.footer-btn:disabled{opacity:.3;cursor:default}
+.footer-count{font-size:12px;color:var(--hint)}
+
+/* Common */
+.slide-label{font-size:11px;color:var(--teal);font-weight:600;letter-spacing:.05em;margin-bottom:4px}
+.slide-title{font-size:22px;font-weight:500;line-height:1.35}
+.title-block{border-left:3px solid var(--teal);padding-left:14px;margin-bottom:4px}
+.badge{display:inline-block;font-size:11px;font-weight:600;border-radius:6px;padding:2px 10px;white-space:nowrap}
+.badge-teal{background:var(--teal-l);color:var(--teal-d);border:1px solid var(--teal-m)}
+.badge-purple{background:var(--purple-l);color:var(--purple-d);border:1px solid var(--purple-m)}
+.badge-gray{background:#f1efe8;color:#444441;border:1px solid #b4b2a9}
+.badge-amber{background:#FAEEDA;color:#633806}
+.callout{border-radius:10px;padding:12px 18px;font-size:13px;line-height:1.7}
+.callout-teal{background:var(--teal-l);border:1px solid var(--teal-m);color:var(--teal-d)}
+.callout-purple{background:var(--purple-l);border:1px solid var(--purple-m);color:var(--purple-d)}
+.callout-neutral{background:#f8f7f3;color:var(--muted);text-align:center}
+.card{border:1px solid var(--border);border-radius:12px;padding:18px 20px}
+.card-teal{border-color:var(--teal)}
+.card-purple{border-color:var(--purple)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.col{display:flex;flex-direction:column;gap:10px}
+.dot{width:5px;height:5px;border-radius:50%;background:var(--teal);margin-top:7px;flex-shrink:0;display:inline-block}
+.dot-purple{background:var(--purple)}
+.row{display:flex;gap:8px;align-items:flex-start}
+.num-circle{width:22px;height:22px;border-radius:50%;background:var(--purple);color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex-shrink:0}
+p.label{font-size:11px;color:var(--hint);margin-bottom:4px}
+p.sub{font-size:11px;color:var(--muted)}
+.check{color:var(--teal);font-size:12px;line-height:1.6}
+.plus{color:var(--teal-d);font-size:12px;font-weight:600;line-height:1.6}
+.status{font-size:11px;font-weight:600;border-radius:6px;padding:4px 12px;white-space:nowrap}
+.status-done{background:var(--teal-l);color:var(--teal-d)}
+.status-none{background:#FCEBEB;color:#A32D2D}
+.status-part{background:#FAEEDA;color:#633806}
+.note-pill{font-size:11px;border-radius:4px;padding:1px 8px;display:inline-block;margin-top:3px;background:var(--teal-l);color:var(--teal-d)}
+.tag-small{font-size:10px;font-weight:600;border-radius:4px;padding:2px 7px;white-space:nowrap}
+.price-box{background:#f8f7f3;border-radius:10px;padding:12px 16px}
+.price-note{font-size:11px;color:var(--hint);border-top:1px solid var(--border);padding-top:6px;margin-top:6px}
+
+/* Slide-specific */
+#s1 .cover-label{font-size:12px;color:var(--teal);font-weight:600;letter-spacing:.1em;margin-bottom:10px}
+#s1 h1{font-size:28px;font-weight:500;line-height:1.4;margin-bottom:14px}
+#s1 .cover-sub{font-size:15px;color:var(--muted);line-height:1.7}
+#s1 .meta{border-top:1px solid var(--border);padding-top:20px;display:flex;gap:32px}
+#s1 .meta-item p:first-child{font-size:11px;color:var(--hint);margin-bottom:3px}
+#s1 .meta-item p:last-child{font-size:13px;font-weight:600}
+#s1 .badges{display:flex;gap:10px;flex-wrap:wrap}
+
+.opp-plus{display:flex;justify-content:center;align-items:center;font-size:24px;color:var(--hint)}
+.opp-left{border:1px solid var(--border);border-radius:12px;padding:20px 22px}
+.opp-right{border:2px solid var(--purple);border-radius:12px;padding:20px 22px;background:var(--purple-l)}
+
+.num-large{font-size:28px;font-weight:500;line-height:1}
+.tag-row{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px}
+
+.trend-row{display:grid;grid-template-columns:1fr auto 1.4fr;gap:12px;align-items:center;background:#f8f7f3;border:1px solid var(--border);border-radius:10px;padding:14px 18px}
+
+.flow-item{display:flex;gap:10px;align-items:flex-start}
+.flow-tag{font-size:10px;font-weight:600;border-radius:4px;padding:2px 7px;white-space:nowrap;background:var(--teal-d);color:#9FE1CB}
+.flow-tag-purple{background:var(--purple-d);color:#CECBF6}
+
+.phase-badge{font-size:10px;font-weight:600;border-radius:4px;padding:2px 8px;background:var(--teal-l);color:var(--teal-d)}
+.q-mark{color:var(--purple);font-weight:600;font-size:14px;line-height:1.4}
+</style>
+</head>
+<body>
+<div class="app">
+<div class="deck">
+
+<!-- NAV -->
+<div class="nav" id="nav"></div>
+
+<!-- SLIDES -->
+
+<!-- S1: Cover -->
+<div class="slide active" id="s1">
+  <div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:28px;padding:20px 0">
+    <div>
+      <p class="cover-label">EXPANSION PROPOSAL</p>
+      <h1>AIコンシェルジュで、<br>来場前の検討体験を変える。</h1>
+      <p class="cover-sub">      動画アセット拡充 × AI接客エージェント 導入提案</p>
+    </div>
+    <div class="badges">
+      <span class="badge badge-teal">動画アセット拡充</span>
+      <span class="badge badge-purple">AI接客エージェント</span>
+    </div>
+  </div>
+</div>
+
+<!-- S2: Trend -->
+<div class="slide" id="s2">
+  <div class="title-block">
+    <p class="slide-label">MARKET TREND</p>
+    <h2 class="slide-title">消費者の期待が進化している</h2>
+  </div>
+  <div class="col" style="gap:10px">
+    <div class="trend-row">
+      <div><p class="label">消費者の期待</p><p style="font-size:13px;font-weight:600">動画で体感してから検討したい</p></div>
+      <span class="status status-done">✓ 取り組み中</span>
+      <div><p class="label">次のアクション</p><p style="font-size:13px">ライフスタイル系ショート動画アセットをさらに拡充</p></div>
+    </div>
+    <div class="trend-row">
+      <div><p class="label">消費者の期待</p><p style="font-size:13px;font-weight:600">疑問はその場で即座に解消したい</p></div>
+      <span class="status status-none">× 未着手</span>
+      <div><p class="label">次のアクション</p><p style="font-size:13px">AI接客エージェントの導入で即座に疑問を解消する</p></div>
+    </div>
+    <div class="trend-row">
+      <div><p class="label">消費者の期待</p><p style="font-size:13px;font-weight:600">どんな暮らしができるかをイメージしたい</p></div>
+      <span class="status status-part">△ 一部対応</span>
+      <div><p class="label">次のアクション</p><p style="font-size:13px">動画とAI接客エージェントによる次世代の顧客体験を提供する</p></div>
+    </div>
+  </div>
+  <div class="callout callout-teal">
+    動画では着実に土台を築いてきた創建だからこそ、次の一手はAI接客エージェントを加えること。<br>
+    <strong>動画 × AI接客エージェントの掛け合わせ</strong>で、競合がまだ追いつけない次世代の顧客体験をつくることができる。
+  </div>
+</div>
+
+<!-- S3: Opportunity -->
+<div class="slide" id="s3">
+  <div class="title-block">
+    <p class="slide-label">STRENGTH &amp; OPPORTUNITY</p>
+    <h2 class="slide-title">創建の強みを、もっと届ける</h2>
+  </div>
+  <div class="grid2" style="grid-template-columns:1fr 48px 1fr;align-items:center">
+    <div class="opp-left">
+      <p class="slide-label" style="margin-bottom:12px">すでに取り組んでいること</p>
+      <div class="col" style="gap:10px">
+        <div class="row"><span class="dot"></span><p style="font-size:12px"><strong>動画資産</strong><span style="color:var(--muted);margin-left:6px">内見・街紹介動画を継続制作</span></p></div>
+        <div class="row"><span class="dot"></span><p style="font-size:12px"><strong>SNS運用</strong><span style="color:var(--muted);margin-left:6px">Instagram / TikTok / YouTube</span></p></div>
+        <div class="row"><span class="dot"></span><p style="font-size:12px"><strong>制作体制</strong><span style="color:var(--muted);margin-left:6px">内製＋外注で柔軟に対応</span></p></div>
+      </div>
+    </div>
+    <div class="opp-plus">+</div>
+    <div class="opp-right">
+      <p style="font-size:11px;font-weight:600;color:var(--purple-d);margin-bottom:12px;letter-spacing:.05em">いち早く取り組むこと（チャンス）</p>
+      <div class="col" style="gap:10px">
+        <div class="row"><span class="dot dot-purple"></span><p style="font-size:12px;color:var(--purple-d)"><strong>動画アセット拡充</strong><span style="margin-left:6px;opacity:.85">ライフスタイル系ショートで暮らしを提案</span></p></div>
+        <div class="row"><span class="dot dot-purple"></span><p style="font-size:12px;color:var(--purple-d)"><strong>AI接客エージェント導入</strong><span style="margin-left:6px;opacity:.85">24時間・即時の疑問解消を実現</span></p></div>
+        <div class="row"><span class="dot dot-purple"></span><p style="font-size:12px;color:var(--purple-d)"><strong>動画×AI接客エージェント連携</strong><span style="margin-left:6px;opacity:.85">AIが動画で回答できる範囲を広げる</span></p></div>
+      </div>
+    </div>
+  </div>
+  <div class="callout callout-neutral" style="font-size:13px">
+    動画で興味を持ち → AI接客エージェントで疑問を解消し → 来場を決める、という新しい検討導線が完成する
+  </div>
+</div>
+
+<!-- S4: Overview -->
+<div class="slide" id="s4">
+  <div class="title-block">
+    <p class="slide-label">PROPOSAL OVERVIEW</p>
+    <h2 class="slide-title">提案全体像</h2>
+  </div>
+  <div class="callout callout-purple" style="font-size:13px">
+    目指すゴール：AI接客エージェントを軸に、検討者の疑問を対話と動画でまるごと解消し、<strong>資料請求・来場予約へつなげる</strong>
+  </div>
+  <div class="grid2">
+    <div class="card card-purple" style="background:var(--purple-l)">
+      <div class="tag-row">
+        <span class="num-large" style="color:var(--purple)">01</span>
+        <span class="badge badge-purple" style="font-size:11px">未着手 → いち早く導入</span>
+      </div>
+      <p style="font-size:15px;font-weight:600;margin-bottom:12px">AI接客エージェント 導入</p>
+      <div class="col" style="gap:7px">
+        <div class="row"><span class="dot dot-purple"></span><p style="font-size:12px;color:var(--muted)">住宅検討における疑問・不安に24時間即時回答</p></div>
+        <div class="row"><span class="dot dot-purple"></span><p style="font-size:12px;color:var(--muted)">対話と動画で検討者の疑問に答えるAIコンシェルジュ</p></div>
+        <div class="row"><span class="dot dot-purple"></span><p style="font-size:12px;color:var(--muted)">疑問が解消された検討者を資料請求・来場予約へ誘導</p></div>
+      </div>
+    </div>
+    <div class="card card-teal">
+      <div class="tag-row">
+        <span class="num-large" style="color:var(--teal)">02</span>
+        <span class="badge badge-teal" style="font-size:11px">取り組み済みをさらに強化</span>
+      </div>
+      <p style="font-size:15px;font-weight:600;margin-bottom:12px">動画アセット拡充</p>
+      <div class="col" style="gap:7px">
+        <div class="row"><span class="dot"></span><p style="font-size:12px;color:var(--muted)">街紹介・ライフスタイル系ショート動画を大量制作</p></div>
+        <div class="row"><span class="dot"></span><p style="font-size:12px;color:var(--muted)">動画アセットが増えるほどAIが動画で答えられる幅が広がる</p></div>
+        <div class="row"><span class="dot"></span><p style="font-size:12px;color:var(--muted)">対話 + 動画の組み合わせで顧客体験がさらに向上</p></div>
+      </div>
+    </div>
+  </div>
+  <div class="callout callout-neutral" style="font-size:13px">
+    動画アセットが増えるほどAIの回答がリッチになる。<strong style="color:var(--text)">01と02は連動して効果が高まる</strong>
+  </div>
+</div>
+
+<!-- S5: Video -->
+<div class="slide" id="s5">
+  <div class="title-block">
+    <p class="slide-label">PROPOSAL 01</p>
+    <h2 class="slide-title">動画アセットの拡充</h2>
+  </div>
+  <div class="callout callout-purple" style="font-size:13px">
+    AI FAQが対話と動画で答えられる幅を広げるために、動画アセットを大量に制作する。<br>
+    すでにある街紹介・内見素材を活用し、<strong>ライフスタイル視点のショート動画</strong>を量産することで、AIの回答品質が高まる。
+  </div>
+  <div class="grid2">
+    <div class="col">
+      <p style="font-size:12px;font-weight:600;color:var(--muted)">制作コンテンツの方向性</p>
+      <div style="background:#f8f7f3;border-radius:10px;padding:14px 16px">
+        <p class="label">すでにある</p>
+        <div class="row" style="margin-bottom:5px"><span class="check">✓</span><p style="font-size:12px;color:var(--muted)">物件内見動画（室内・間取り紹介）</p></div>
+        <div class="row"><span class="check">✓</span><p style="font-size:12px;color:var(--muted)">街紹介動画（周辺施設・アクセス）</p></div>
+      </div>
+      <div class="callout callout-teal" style="padding:14px 16px">
+        <p style="font-size:11px;font-weight:600;margin-bottom:6px">Fireworkがサポートする拡充コンテンツ</p>
+        <div class="row" style="margin-bottom:5px"><span class="plus">+</span><p style="font-size:12px;color:var(--teal-d)">ライフスタイル提案（休日・街の魅力）</p></div>
+        <div class="row" style="margin-bottom:5px"><span class="plus">+</span><p style="font-size:12px;color:var(--teal-d)">家づくり解説（外断熱・自由設計など）</p></div>
+        <div class="row"><span class="plus">+</span><p style="font-size:12px;color:var(--teal-d)">縦型ショート（9:16）フォーマット</p></div>
+      </div>
+      <div class="price-box">
+        <p class="label">参考価格</p>
+        <p style="font-size:14px;font-weight:600;margin-bottom:2px">¥60,000 / 本（税別）</p>
+        <p style="font-size:11px;color:var(--muted);margin-bottom:6px">最低10本〜　単価制</p>
+        <p class="price-note">※上記は参考価格です。素材内容・本数により異なるため、正式なお見積りが必要となります。</p>
+      </div>
+    </div>
+    <div class="col">
+      <p style="font-size:12px;font-weight:600;color:var(--muted)">素材 → コンテンツ例</p>
+      <div class="col" style="gap:8px">
+        <div id="content-items"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- S6: AI FAQ -->
+<div class="slide" id="s6">
+  <div class="title-block">
+    <p class="slide-label">PROPOSAL 02</p>
+    <h2 class="slide-title">AI接客エージェント</h2>
+  </div>
+  <div class="grid2">
+    <div class="col">
+      <p style="font-size:12px;font-weight:600;color:var(--muted)">検討者が抱える疑問（例）</p>
+      <div class="col" style="gap:7px" id="faq-items"></div>
+    </div>
+    <div class="col">
+      <p style="font-size:12px;font-weight:600;color:var(--muted)">体験フロー</p>
+      <div class="col" style="gap:12px" id="flow-items"></div>
+      <div class="callout callout-purple" style="font-size:12px;margin-top:4px">
+        <strong>動画アセットとの連動がポイント。</strong><br>
+        ショート動画が増えるほど、AI接客エージェントが対話だけでなく映像でも答えられる範囲が広がり、顧客体験の質が高まり続ける。
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- S7: Synergy -->
+<div class="slide" id="s7">
+  <div class="title-block">
+    <p class="slide-label">SYNERGY</p>
+    <h2 class="slide-title">2つの提案が生む体験の変化</h2>
+  </div>
+  <div class="grid2">
+    <div class="card">
+      <p style="font-size:12px;color:var(--hint);font-weight:600;margin-bottom:12px">Before</p>
+      <div class="col" style="gap:8px" id="before-items"></div>
+    </div>
+    <div class="card card-purple" style="background:var(--purple-l)">
+      <p style="font-size:12px;color:var(--purple-d);font-weight:600;margin-bottom:12px">After — Firework導入後</p>
+      <div class="col" style="gap:8px" id="after-items"></div>
+    </div>
+  </div>
+  <div class="callout callout-neutral" style="font-size:13px">
+    動画アセットが増えるほど、AI接客エージェントが<strong style="color:var(--text)">対話 + 動画</strong>で答えられる幅が広がり、顧客体験の質が高まり続ける
+  </div>
+</div>
+
+<!-- S8: Next -->
+<div class="slide" id="s8">
+  <div class="title-block">
+    <p class="slide-label">NEXT STEPS</p>
+    <h2 class="slide-title">フェーズ別ネクストステップ</h2>
+  </div>
+  <div class="grid3" id="phase-items"></div>
+  <div style="background:#f8f7f3;border-radius:10px;padding:14px 20px">
+    <p style="font-size:12px;font-weight:600;margin-bottom:8px">MTGで確認したいこと</p>
+    <div class="col" style="gap:6px">
+      <div class="row"><span class="q-mark">?</span><p style="font-size:12px;color:var(--muted)">デモ制作のための動画素材（街紹介 or 内見）のご提供</p></div>
+      <div class="row"><span class="q-mark">?</span><p style="font-size:12px;color:var(--muted)">AI接客エージェントに登録するQ&amp;Aの優先項目（物件情報・家づくり・街情報）</p></div>
+      <div class="row"><span class="q-mark">?</span><p style="font-size:12px;color:var(--muted)">どの物件・シリーズからパイロット導入するかのご意向</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- S9: Future -->
+<div class="slide" id="s9">
+  <div class="title-block">
+    <p class="slide-label">FUTURE ROADMAP</p>
+    <h2 class="slide-title">今後のロードマップ（参考）</h2>
+  </div>
+  <p style="font-size:13px;color:var(--muted);line-height:1.7">
+    今回の2本柱に加え、以下のソリューションで検討体験をさらに進化させることができます。
+  </p>
+  <div class="grid2">
+    <div class="card">
+      <div class="tag-row" style="margin-bottom:10px">
+        <p style="font-size:15px;font-weight:600">AI Avatarライブ配信</p>
+        <span class="badge badge-teal" style="font-size:10px">グローバル実績あり</span>
+      </div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.7">AIが生成したアバターホストが物件・街をライブで案内。Samsung Turkey等でグローバル成約実績。遠方の検討者に来場前の内覧体験を提供。</p>
+    </div>
+    <div class="card">
+      <div class="tag-row" style="margin-bottom:10px">
+        <p style="font-size:15px;font-weight:600">AIGC動画生成</p>
+        <span class="badge badge-amber" style="font-size:10px">不動産カテゴリ開発中</span>
+      </div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.7">静止画からAI動画を自動生成し、物件ごとのコンテンツを量産。アパレル・ファッションで品質安定。不動産カテゴリは改善中のため、準備が整い次第提案。</p>
+    </div>
+  </div>
+  <div style="border-top:1px solid var(--border);padding-top:18px">
+    <p style="font-size:20px;font-weight:500;margin-bottom:12px;line-height:1.4">動画とAIで、来場前の検討体験を変える。</p>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <span class="badge badge-teal">動画アセット拡充</span>
+      <span class="badge badge-purple">AI FAQ 導入</span>
+      <span class="badge badge-gray">Firework</span>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  <button class="footer-btn" id="prev-btn" onclick="go(-1)">← 前へ</button>
+  <span class="footer-count" id="counter">1 / 9</span>
+  <button class="footer-btn" id="next-btn" onclick="go(1)">次へ →</button>
+</div>
+
+</div>
+</div>
+
+<script>
+const slides=[{id:'s1',label:'表紙'},{id:'s2',label:'消費者期待の変化'},{id:'s3',label:'創建の強みと機会'},{id:'s4',label:'提案全体像'},{id:'s5',label:'提案① 動画'},{id:'s6',label:'提案② AI FAQ'},{id:'s7',label:'相乗効果'},{id:'s8',label:'ネクストステップ'},{id:'s9',label:'ロードマップ'}];
+let cur=0;
+
+// Build nav
+const nav=document.getElementById('nav');
+slides.forEach((s,i)=>{
+  const b=document.createElement('button');
+  b.className='nav-btn'+(i===0?' active':'');
+  b.textContent=(i+1)+'. '+s.label;
+  b.onclick=()=>goTo(i);
+  nav.appendChild(b);
+});
+
+function goTo(n){
+  document.getElementById(slides[cur].id).classList.remove('active');
+  nav.children[cur].classList.remove('active');
+  cur=n;
+  document.getElementById(slides[cur].id).classList.add('active');
+  nav.children[cur].classList.add('active');
+  document.getElementById('counter').textContent=(cur+1)+' / '+slides.length;
+  document.getElementById('prev-btn').disabled=cur===0;
+  document.getElementById('next-btn').disabled=cur===slides.length-1;
+}
+function go(d){goTo(Math.max(0,Math.min(slides.length-1,cur+d)));}
+document.getElementById('prev-btn').disabled=true;
+
+// S6 FAQ items
+const faqs=[
+  {cat:'家づくり',q:'外断熱工法って何が違うの？',bg:'var(--teal-l)',tc:'var(--teal-d)'},
+  {cat:'家づくり',q:'自由設計でどこまで変えられる？',bg:'var(--teal-l)',tc:'var(--teal-d)'},
+  {cat:'街・環境',q:'近くにスーパーや公園はある？',bg:'var(--purple-l)',tc:'var(--purple-d)'},
+  {cat:'街・環境',q:'学区・通勤時間はどのくらい？',bg:'var(--purple-l)',tc:'var(--purple-d)'},
+  {cat:'物件・購入',q:'この物件の価格や広さを教えて',bg:'#FAEEDA',tc:'#633806'},
+  {cat:'物件・購入',q:'モデルハウス見学は予約が必要？',bg:'#FAEEDA',tc:'#633806'},
+];
+const fi=document.getElementById('faq-items');
+faqs.forEach(f=>{
+  fi.innerHTML+=`<div style="display:flex;gap:8px;align-items:center;border:1px solid var(--border);border-radius:8px;padding:8px 12px">
+    <span style="font-size:10px;background:${f.bg};color:${f.tc};border-radius:4px;padding:2px 7px;white-space:nowrap">${f.cat}</span>
+    <p style="font-size:12px;margin:0">${f.q}</p>
+  </div>`;
+});
+
+// S6 flow items
+const flows=[
+  {step:'住宅購入の比較検討中に疑問・不安が生まれる',note:'価格・間取り・街・家づくりなど'},
+  {step:'物件サイトのAI接客エージェントに気になることを質問',note:null},
+  {step:'AIがテキストで即回答 + 関連動画も提示',note:'動画アセットが増えるほど回答がリッチに'},
+  {step:'疑問が解消され、資料請求・来場予約へ',note:null},
+];
+const fl=document.getElementById('flow-items');
+flows.forEach((f,i)=>{
+  fl.innerHTML+=`<div class="flow-item">
+    <div class="num-circle">${i+1}</div>
+    <div>
+      <p style="font-size:13px;font-weight:600;margin:0;line-height:1.5">${f.step}</p>
+      ${f.note?`<span class="note-pill">${f.note}</span>`:''}
+    </div>
+  </div>`;
+});
+
+// S7 before/after
+const befores=['住宅の比較検討中に疑問・不安が生まれる','問い合わせをためらう・後回しにする','疑問が解消されないまま離脱','他の物件・競合サイトへ流出'];
+const bi=document.getElementById('before-items');
+befores.forEach((s,i)=>{
+  bi.innerHTML+=`<div class="row"><span style="font-size:12px;color:var(--hint);line-height:1.6">${i+1}.</span><p style="font-size:13px;color:var(--muted);line-height:1.6">${s}</p></div>`;
+});
+const afters=[
+  {t:'住宅の比較検討中に疑問・不安が生まれる',tag:''},
+  {t:'物件サイトのAI接客エージェントに質問',tag:'提案②'},
+  {t:'テキストで即回答 + 関連する街・暮らし動画も提示',tag:'①×②'},
+  {t:'疑問が解消され、資料請求・来場予約へ',tag:'提案②'},
+];
+const ai=document.getElementById('after-items');
+afters.forEach((s,i)=>{
+  ai.innerHTML+=`<div class="row" style="justify-content:space-between">
+    <div class="row" style="flex:1">
+      <span style="font-size:12px;color:var(--purple-d);line-height:1.6">${i+1}.</span>
+      <p style="font-size:12px;color:var(--purple-d);line-height:1.5;margin:0">${s.t}</p>
+    </div>
+    ${s.tag?`<span class="flow-tag flow-tag-purple" style="margin-left:8px;flex-shrink:0">${s.tag}</span>`:''}
+  </div>`;
+});
+
+// S8 phases
+const phases=[
+  {phase:'Phase 1',label:'デモ制作・確認',period:'MTG直後〜',items:['街紹介または内見の動画素材をご提供いただく','Fireworkがショート動画デモを1〜2本制作','AI接客エージェントのデモ環境を構築・体験いただく']},
+  {phase:'Phase 2',label:'パイロット導入',period:'合意後 1〜2ヶ月',items:['特設サイト1物件にショート動画を実装','AI FAQを1物件で稼働','KPI設定：滞在時間・来場予約数']},
+  {phase:'Phase 3',label:'全物件への展開',period:'3ヶ月後〜',items:['計測結果をもとに各シリーズへ展開','動画アセットの継続的な拡充','AI FAQの回答精度向上']},
+];
+const pi=document.getElementById('phase-items');
+phases.forEach(p=>{
+  let items=p.items.map(t=>`<div class="row" style="margin-bottom:7px"><span class="dot"></span><p style="font-size:12px;color:var(--muted);line-height:1.5">${t}</p></div>`).join('');
+  pi.innerHTML+=`<div class="card" style="display:flex;flex-direction:column;gap:10px">
+    <div>
+      <span class="phase-badge">${p.phase}</span>
+      <p style="font-size:14px;font-weight:600;margin:8px 0 2px">${p.label}</p>
+      <p style="font-size:11px;color:var(--hint)">${p.period}</p>
+    </div>
+    <div style="border-top:1px solid var(--border);padding-top:10px">${items}</div>
+  </div>`;
+});
+</script>
+</body>
+</html>
